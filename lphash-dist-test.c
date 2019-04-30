@@ -204,8 +204,8 @@ static void run_hash_test(enum key_type key_type, enum hash_type hash_type,
 	keys = create_keys(alloc_size);
 
 	if (hash_type == HASH_TYPE_MULTADD) {
-		while (add == 0)		// ensure non-zero
-			add = random();
+		while (add == 0)			// ensure non-zero
+			add = random() / table_size;
 	}
 
 	if (reduce_type == REDUCE_TYPE_SHIFT ||
@@ -413,10 +413,12 @@ int main(int argc, char **argv)
 		max_alloc = max_load;
 
 	if (min_alloc == max_alloc) {
-		if (num_ops == 0)
+		if (num_ops == 0) {
 			num_ops = max_load;
-		else if (num_ops > table_size)
-			exit_usage(prog, "operations exceed table size");
+		} else if (num_ops > max_alloc) {
+			exit_usage(prog, "operations exceed fixed number of "
+					 "key allocations");
+		}
 	} else if (num_ops == 0) {
 		num_ops = DEFAULT_NUM_OPS;
 	}
